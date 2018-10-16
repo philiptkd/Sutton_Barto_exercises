@@ -12,7 +12,7 @@ env = BanditEnv(k)
 
 fig = plt.figure()
 
-for (eps, init) in [(0,5), (0.1,0)]:
+for (eps, init) in [(0.,5.),(0.1,0.)]:
     #reward_hist = np.zeros(steps)
     percent_correct_action = np.zeros(steps)
     

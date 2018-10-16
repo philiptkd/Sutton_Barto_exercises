@@ -3,11 +3,12 @@ import random
 from bandit_env import BanditEnv
 
 class EpsGreedyActor():
-    def __init__(self, env, eps, initial_estimate=0):
+    def __init__(self, env, eps, initial_estimate=0., alpha=None):
         self.env = env
         self.k = env.k
         self.eps = eps
-        self.means = np.full(self.k, initial_estimate)
+        self.alpha = alpha
+        self.means = np.full(self.k, float(initial_estimate))
         self.counts = np.zeros(self.k)
         
     def run(self, steps=1000):
@@ -24,6 +25,13 @@ class EpsGreedyActor():
             
             reward_hist[step] = r
             self.counts[action] += 1
-            self.means[action] += (r-self.means[action])/self.counts[action]
+
+            # use a constant step size if we have it. otherwise, do incremental
+                # average calculation
+            if self.alpha is None:
+                self.means[action] += (r-self.means[action])/self.counts[action]
+            else:
+                self.means[action] += self.alpha*(r-self.means[action])
+                
             took_correct_action[step] = int(action==optimal_action)
         return reward_hist, took_correct_action
