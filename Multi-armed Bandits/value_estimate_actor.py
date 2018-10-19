@@ -10,7 +10,7 @@ class ValueEstimateActor(Actor):
         self.counts = np.zeros(self.num_actions)
 
     def update_stats(self, r, action):
-        super().update_stats(r,action)
+        self.counts[action] += 1
 
         # use a constant step size if we have it. otherwise, do incremental
             # average calculation

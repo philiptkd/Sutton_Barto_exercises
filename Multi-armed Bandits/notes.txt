@@ -1,0 +1,5 @@
+I wasn't able to reproduce the authors' Figure 2.4
+of the average reward of UCB vs. epsilon-greedy bandit
+action selection using their parameters.
+Using other parameters, I did observe the same
+behavior.

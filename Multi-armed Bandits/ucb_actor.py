@@ -9,7 +9,7 @@ from value_estimate_actor import ValueEstimateActor
 
 class UcbActor(ValueEstimateActor):
     def __init__(self, env, c, initial_estimate=0., alpha=None):
-        super().__init__(env, initial_estimate=0., alpha=None)
+        super().__init__(env, initial_estimate=initial_estimate, alpha=alpha)
         self.c = c
         self.U = np.full(self.num_actions, np.Inf)  #initially, Nt(a) = 0
 

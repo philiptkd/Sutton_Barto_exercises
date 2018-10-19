@@ -6,7 +6,7 @@ import random
 
 runs = 2000
 steps = 1000
-num_actions = 10
+num_actions = 2
 alpha = 0.1
 fig = plt.figure()
 rng = random.Random(1234)
@@ -17,7 +17,7 @@ for (eps, init) in [(0.,5.),(0.1,0.)]:
     
     for run in range(runs):
         env = BanditEnv(rng, num_actions)
-        actor = EpsGreedyActor(env, eps, rng, initial_estimate=init, alpha=alpha)
+        actor = EpsGreedyActor(env, eps, initial_estimate=init, alpha=alpha)
         rewards, correct_actions = actor.run(steps)
         #reward_hist += (rewards - reward_hist)/(run+1)
         percent_correct_action += correct_actions

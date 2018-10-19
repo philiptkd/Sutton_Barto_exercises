@@ -5,6 +5,7 @@ class Actor():
     def __init__(self, env):
         self.env = env
         self.num_actions = env.num_actions
+        self.rng = env.rng
 
     def run(self, steps=1000):
         optimal_action = np.argmax([mu for (mu,std) in self.env.r_dists])
@@ -24,4 +25,4 @@ class Actor():
         raise NotImplementedError()
 
     def update_stats(self, r, action):
-        self.counts[action] += 1
+        raise NotImplementedError()
