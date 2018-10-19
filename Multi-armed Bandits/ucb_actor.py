@@ -1,13 +1,13 @@
 import numpy as np
 from bandit_env import BanditEnv
-from actor import Actor
+from value_estimate_actor import ValueEstimateActor
 
 # uses an Upper Confidence Bound for the estimate of each action's value
 # U(a) = c*sqrt[log(t) / counts(a)]
     # where t is the number of actions taken so far
     # and counts(a) is the number of times action a has been taken
 
-class UcbActor(Actor):
+class UcbActor(ValueEstimateActor):
     def __init__(self, env, c, initial_estimate=0., alpha=None):
         super().__init__(env, initial_estimate=0., alpha=None)
         self.c = c

@@ -1,15 +1,11 @@
 import numpy as np
-import random
 from bandit_env import BanditEnv
 
 class Actor():
-    def __init__(self, env, initial_estimate=0., alpha=None):
+    def __init__(self, env):
         self.env = env
         self.num_actions = env.num_actions
-        self.alpha = alpha
-        self.means = np.full(self.num_actions, float(initial_estimate))
-        self.counts = np.zeros(self.num_actions)
-        
+
     def run(self, steps=1000):
         optimal_action = np.argmax([mu for (mu,std) in self.env.r_dists])
         
@@ -29,11 +25,3 @@ class Actor():
 
     def update_stats(self, r, action):
         self.counts[action] += 1
-
-        # use a constant step size if we have it. otherwise, do incremental
-            # average calculation
-        if self.alpha is None:
-            self.means[action] += (r-self.means[action])/self.counts[action]
-        else:
-            self.means[action] += self.alpha*(r-self.means[action])
-        

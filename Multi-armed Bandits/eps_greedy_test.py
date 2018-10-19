@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from bandit_env import BanditEnv
-from eps_greedy import EpsGreedyActor
+from eps_greedy_actor import EpsGreedyActor
 
 runs = 2000
 steps = 1000
