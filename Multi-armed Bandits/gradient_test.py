@@ -2,7 +2,7 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 from bandit_env import BanditEnv
-from gradient_actor import GradientActor
+from actors import grad
 
 runs = 2000
 steps = 1000
@@ -15,7 +15,7 @@ for baseline in [False, True]:
 
         for run in range(runs):
             env = BanditEnv(rng, num_actions, 4)
-            actor = GradientActor(env, alpha, baseline)
+            actor = grad.GradientActor(env, alpha, baseline)
             _, correct_actions = actor.run(steps)
             percent_correct_action += correct_actions
 
