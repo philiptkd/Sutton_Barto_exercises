@@ -5,9 +5,10 @@ from bandit_env import BanditEnv
 from actors import eps, ucb, grad
 import pickle
 
-runs = 200
-steps = 1000
+runs = 10
+steps = 200000
 num_actions = 10
+stationary = False
 rng = random.Random(1234)
 
 actor_list = [ eps.EpsGreedyActor,
@@ -18,11 +19,11 @@ actor_list = [ eps.EpsGreedyActor,
 def getPlotPoint(actor_type, param_list):
     reward_hist = np.zeros(steps)
     for run in range(runs):
-        env = BanditEnv(rng, num_actions, 0)
+        env = BanditEnv(rng, num_actions, 4, stationary)
         actor = actor_list[actor_type](env, *param_list)
         rewards, _ = actor.run(steps)
         reward_hist += (rewards - reward_hist)/(run+1)
-    return(np.mean(reward_hist))
+    return(np.mean(reward_hist[len(reward_hist)//2:])) # use last half of steps
     
 ax1 = plt.subplot(1,1,1)
 param_values = [2**i for i in range(-7,5)]
@@ -31,7 +32,7 @@ for param in param_values:
     print(param)
     eps_curve.append(getPlotPoint(0, [param, 0., 0.1]))
     opt_curve.append(getPlotPoint(0, [1/16, param, 0.1]))
-    ucb_curve.append(getPlotPoint(1, [param, 0., 0.15]))
+    ucb_curve.append(getPlotPoint(1, [param, 0., 0.1]))
     grad_curve.append(getPlotPoint(2, [param, True]))
 
 #save just in case
