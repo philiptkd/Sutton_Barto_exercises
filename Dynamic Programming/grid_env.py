@@ -35,6 +35,8 @@ class GridEnv():
             self.wind = wind
 
         self.transition_probs = self.get_transition_probs()
+        self.rewards = np.full((self.num_states, self.num_actions), -1.)
+        self.rewards[self.terminal_states,:] = 0.
 
     def get_transition_probs(self):
         tp = np.zeros((self.num_states, self.num_actions, self.num_states)) # P(s,a,s'). r is always -1 unless in terminal state

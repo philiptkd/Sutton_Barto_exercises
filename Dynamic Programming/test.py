@@ -1,5 +1,4 @@
-from grid_env import GridEnv
-import random
-
-env = GridEnv(random.Random(), 2, 2, [0], wind=[.1, -.1])
-print(env.transition_probs)
+import numpy as np 
+a = np.zeros((2,3))
+a += 1
+print(a)

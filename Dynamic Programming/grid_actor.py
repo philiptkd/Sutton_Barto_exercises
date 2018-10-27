@@ -6,7 +6,7 @@ class GridActor():
         self.env = env
         self.num_actions = env.num_actions
         self.rng = env.rng
-        self.policy = RandPolicy(self.num_actions, self.rng)
+        self.policy = RandPolicy(self.env.num_states, self.num_actions, self.rng)
         self.V = self.rng.uniform(-25, -5, env.num_states)
         for state in env.terminal_states:
             self.V[state] = 0.
@@ -19,12 +19,21 @@ class GridActor():
             maxDiff = 0
             for state in range(len(self.V)):
                 tmp = self.V[state]
-                self.V[state] = getExpectation(V, state, policy)
-                maxDiff = max(maxDiff, np.abs(tmp - V[state]))
+                self.V[state] = self.expected_update(self.V, state)
+                maxDiff = max(maxDiff, np.abs(tmp - self.V[state]))
             if maxDiff < eps:
                 break
 
-        return V.reshape((4,4))
+    # just implement the state value equation
+    def expected_update(self, V, state):
+        ret = 0
+        for action in range(self.num_actions):
+            pi = self.policy.get_prob(state, action)
+            r = self.env.rewards[state, action]
+            for next_state in range(self.env.num_states):
+                p = self.env.transition_probs(state, action, next_state)
+                ret += pi*p*(r + self.env.gamma*V[next_state])
+        return ret
 
     # improves the policy used to create V by finding the greedy policy
     def improve(V):
