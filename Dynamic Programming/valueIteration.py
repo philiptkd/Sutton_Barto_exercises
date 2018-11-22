@@ -1,4 +1,4 @@
-# value iteration. gambler's problem
+# value iteration. gambler's problem as in Example 4.3
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -33,7 +33,7 @@ def iterate(eps):
 
 # constants
 gamma = 1
-ph = 0.5
+ph = 0.4
 
 # value iteration
 V, policy = iterate(1e-4)
