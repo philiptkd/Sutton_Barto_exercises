@@ -1,4 +1,4 @@
-# to reproduce Fig. 5.1
+# to reproduce Fig. 5.2
 # plays blackjack with infinite deck
 # evaluates the policy of sticking on 20 or 21
 # uses every visit monte carlo evaluation
