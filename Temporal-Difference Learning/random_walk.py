@@ -7,15 +7,15 @@ runs = 100
 episodes = 100
 gamma = 1
 
+# simple random walk environment
 class WalkMRP():
     def __init__(self):
         self.states = ['Zero', 'A', 'B', 'C', 'D', 'E', 'One']
         self.state = 3 # 'C'
         self.np_random = np.random.RandomState()
-
         self.true_values = np.array([0, 1/6, 2/6, 3/6, 4/6, 5/6, 0])
 
-    # returns reward, done
+    # returns (reward, done)
     def step(self):
         step = self.np_random.choice([-1, 1])
         self.state += step
@@ -26,6 +26,20 @@ class WalkMRP():
             self.state = 3 # reset
             return 0, True
         return 0, False
+
+# plots value estimates for left figure
+def td(alpha):
+    env = WalkMRP()
+    V = np.zeros(len(env.states))
+    V[1:-1] = 0.5
+    epi_gen = td_episodes(V, env, alpha)
+    
+    for episode,v in enumerate(epi_gen):
+        if (episode+1) in [1,10,100]:
+            plt.plot(range(5), v, label=str(episode+1))
+    
+    plt.legend()
+    plt.show()
 
 # generator that yields the value function at each step of the episode
 # td(0) prediction
@@ -48,7 +62,7 @@ def td_episodes(V, env, alpha):
 # every visit monte-carlo prediction
 def mc_episodes(V, env, alpha):
     for episode in range(episodes):
-        trajectory = get_mc_trajectory(env)
+        trajectory = get_trajectory(env)
         G = 0
         for i in range(len(trajectory)-1, -1, -1): # for each step in trajectory, from last to first
             state, reward = trajectory[i]
@@ -56,7 +70,7 @@ def mc_episodes(V, env, alpha):
             V[state] += alpha*(G - V[state])
         yield V[1:-1]
 
-def get_mc_trajectory(env):
+def get_trajectory(env):
     trajectory = []
     done = False
     while not done:
@@ -65,37 +79,29 @@ def get_mc_trajectory(env):
         trajectory.append((state,reward))
     return trajectory
 
-def td(alpha):
-    env = WalkMRP()
-    V = np.zeros(len(env.states))
-    V[1:-1] = 0.5
-    epi_gen = td_episodes(V, env, alpha)
-    
-    for episode,v in enumerate(epi_gen):
-        if (episode+1) in [1,10,100]:
-            plt.plot(range(5), v, label=str(episode+1))
-    
-    plt.legend()
-    plt.show()
-
-
-def plot_error(alpha, gen_fn, name):
+# plots rms error of value function per episode, averaged over all runs
+def plot_error(alpha, gen_fn, name, update_fn=None):
     rms_error = np.zeros((runs,episodes))
     for run in range(runs):
         env = WalkMRP()
         V = np.zeros(len(env.states))
         V[1:-1] = 0.5
-        epi_gen = gen_fn(V, env, alpha)
+
+        if update_fn is not None:
+            epi_gen = gen_fn(V, env, alpha, update_fn)
+        else:
+            epi_gen = gen_fn(V, env, alpha)
+
         for episode,v in enumerate(epi_gen):
             rms_error[run, episode] = np.sqrt(np.average((v - env.true_values[1:-1])**2))
     plt.plot(range(episodes), np.average(rms_error, axis=0), label=name+str(alpha))
 
+def go():
+    for alpha in [.05, .1, .15]:
+        plot_error(alpha, td_episodes, "td ")
 
-for alpha in [.05, .1, .15]:
-    plot_error(alpha, td_episodes, "td ")
+    for alpha in [.01, .02, .03, .04]:
+        plot_error(alpha, mc_episodes, "mc ")
 
-for alpha in [.01, .02, .03, .04]:
-    plot_error(alpha, mc_episodes, "mc ")
-
-plt.legend()
-plt.show()
+    plt.legend()
+    plt.show()
