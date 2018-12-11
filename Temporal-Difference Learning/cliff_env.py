@@ -43,7 +43,7 @@ class CliffEnv():
             self.reset()
         elif tuple(self.state) in self.cliff:
             done = True
-            reward = -100
             self.reset()
+            reward = -100
 
-        return (reward, done)
+        return (self.state, reward, done)
