@@ -4,7 +4,7 @@ class RandomWalkEnv():
     def __init__(self):
         self.num_states = 19 # not counting terminal state(s)
         self.start = 9   # start state
-        self.true_values = np.linspace(1,19,19)/20 
+        self.true_values = np.linspace(-.9,.9,19)
         self.np_random = np.random.RandomState()
         self.reset()
 
@@ -13,7 +13,7 @@ class RandomWalkEnv():
 
     # returns (reward, done)
     def step(self):
-        self.state += np_random.choice([-1,1])
+        self.state += self.np_random.choice([-1,1])
         if self.state == -1:
             self.reset()
             return -1, True
