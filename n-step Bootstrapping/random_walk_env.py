@@ -4,7 +4,7 @@ class RandomWalkEnv():
     def __init__(self):
         self.num_states = 19 # not counting terminal state(s)
         self.start = 9   # start state
-        self.true_values = [i/20 for i in range(1,20)] 
+        self.true_values = np.linspace(1,19,19)/20 
         self.np_random = np.random.RandomState()
         self.reset()
 
