@@ -1,13 +1,13 @@
 import numpy as np
 
 class MazeEnv():
-    def __init__(self):
+    def __init__(self, maze):
         self.width = 9
         self.height = 6
         self.start = (2,0)
         self.goal = (0,8)
         self.actions = ["left", "right", "up", "down"]
-        self.set_grid(1)
+        self.set_grid(maze)
         self.reset()
         self.np_random = np.random.RandomState()
 
