@@ -4,8 +4,6 @@ class MazeEnv():
     def __init__(self, maze):
         self.width = 9
         self.height = 6
-        self.start = (2,0)
-        self.goal = (0,8)
         self.actions = ["left", "right", "up", "down"]
         self.set_grid(maze)
         self.reset()
@@ -17,12 +15,17 @@ class MazeEnv():
             self.grid[1:4,2] = 1
             self.grid[0:3,7] = 1
             self.grid[4,5] = 1
-        elif maze == 2: # for Fig. 8.4
-            self.grid[3,:8] = 1
-        elif maze == 3: # for Fig. 8.4 and Fig. 8.5
-            self.grid[3,1:] = 1
-        elif maze == 4: # for Fig. 8.5
-            self.grid[3,1:8] = 1
+            self.start = (2,0)
+            self.goal = (0,8)
+        else:
+            if maze == 2: # for Fig. 8.4
+                self.grid[3,:8] = 1
+            elif maze == 3: # for Fig. 8.4 and Fig. 8.5
+                self.grid[3,1:] = 1
+            elif maze == 4: # for Fig. 8.5
+                self.grid[3,1:8] = 1
+            self.start = (5, 3)
+            self.goal = (0, 8)
 
     def reset(self):
         self.state = list(self.start)
