@@ -7,7 +7,7 @@ from maze_env import MazeEnv
 runs = 30
 episodes = 50
 gamma = 0.95
-alpha = 0.1
+alpha = 0.5
 eps = 0.1
 
 def plot_fig():
