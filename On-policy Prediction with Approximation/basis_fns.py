@@ -1,19 +1,23 @@
 # used to recreate Fig. 9.5
+# the fourier curves are really noisy. Maybe I picked slightly different basis functions than they did?
+#   Or maybe they didn't use all (n+1) basis functions? they didn't give details.
+#   Fourier features outperformed polynomial ones, so I'm satisfied
 
 from random_walk_env import RandomWalkEnv
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 
-episodes = 1000
-runs = 5
+episodes = 5000
+runs = 30
 alpha = 0.00005
 gamma = 1
-ns = [5]#, 10, 20]
+ns = [5, 10, 20]
 env = RandomWalkEnv()
 true_values = np.array([x/500-1 for x in range(1,1001)]) # approximate
 POLYNOMIAL = 1
 FOURIER = 2
+basis = FOURIER
 
 
 # returns a list of tuples (S_t, R_t)
@@ -37,7 +41,7 @@ def get_alpha_vec(n):
     return np.array(alphas)
 
 
-def get_features(s, n, basis=POLYNOMIAL):
+def get_features(s, n):
     s /= 1000   # normalize
     if basis==POLYNOMIAL:
         x = [s**c for c in range(n+1)]  # polynomial features up to order n
@@ -46,10 +50,11 @@ def get_features(s, n, basis=POLYNOMIAL):
         x = [2*np.cos(np.pi*s*c)-1 for c in range(n+1)]
     return np.array(x)
 
+
 # gradient Monte Carlo as on page 202
 def train(n):
     w = np.zeros(n+1)
-    #alphas = get_alpha_vec(n)   # get vector of alphas for Fourier basis fns
+    alphas = get_alpha_vec(n)   # get vector of alphas for Fourier basis fns
     for episode in range(episodes):
         trajectory = get_trajectory()
         G = 0
@@ -57,9 +62,12 @@ def train(n):
             r = trajectory[t+1][1]
             s = trajectory[t][0]
             G = gamma*G + r
-            x = get_features(s, n, basis=FOURIER) # (n+1)-dimensional vector of features
+            x = get_features(s, n) # (n+1)-dimensional vector of features
             v = np.dot(w,x) # estimate of state value
-            w += alpha*(G-v)*x    # gradient descent
+            if basis==POLYNOMIAL:
+                w += alpha*(G-v)*x    # gradient descent
+            else:   # if basis==FOURIER
+                w += alphas*(G-v)*x     # element-wise multiply alphas to give each feature a different learning rate
         yield w
 
 
@@ -107,7 +115,7 @@ def plot_performance():
                 if episode%1000==0:
                     print("n:"+str(n)+", run:"+str(run)+", episode:"+str(episode))
                 w = next(w_generator)
-                v = [np.dot(w, get_features(s, n, basis=FOURIER)) for s in range(1,1001)] # current state value estimates
+                v = [np.dot(w, get_features(s, n)) for s in range(1,1001)] # current state value estimates
                 ve[episode] = get_ve(v) 
             avg_ve += (ve - avg_ve)/(run+1) # online averaging
         
@@ -116,8 +124,8 @@ def plot_performance():
         outputs[i] = y
         plt.plot(y, label="order "+str(n))
 
-    #with open("polynomial_performance.npy", "wb") as f:
-    #    pickle.dump(outputs, f)
+    with open("fourier_performance.npy", "wb") as f:
+        pickle.dump(outputs, f)
     
     plt.legend()
     plt.show()
