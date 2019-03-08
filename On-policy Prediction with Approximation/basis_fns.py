@@ -73,7 +73,7 @@ def train(n):
 
 # returns the mean squared value error for the given value estimates
 def get_ve(estimate):
-    with open("state_distribution.npy", "rb") as f:
+    with open("data/state_distribution.npy", "rb") as f:
         dist = pickle.load(f)
     diff = true_values - estimate
     return np.dot(dist, diff**2)    # Eqn. (9.1)
@@ -130,4 +130,4 @@ def plot_performance():
     plt.legend()
     plt.show()
 
-plot_performance()
+#plot_performance()
