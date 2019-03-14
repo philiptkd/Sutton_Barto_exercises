@@ -4,7 +4,7 @@ from random_walk_env import RandomWalkEnv
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-from coarse_coding import get_features, get_receptive_fields
+from coarse_coding import approx_v, get_all_bounds
 
 
 # returns a list of tuples (S_t, R_t)
@@ -25,9 +25,10 @@ def get_trajectory(env):
 def grad_mc(episodes, alpha, env, width, gamma=1, offset=None):
     if offset is None:
         offset = width   # no overlap between groups
+    else:
+        bounds = get_all_bounds(width, offset, range(env.num_states))
+    
     num_features = (1000-width)//offset+1
-    receptive_fields = get_receptive_fields(width, num_features, offset)
-
     w = np.zeros(num_features)
     for episode in range(episodes):
         if episode%1000==0:
@@ -44,21 +45,23 @@ def grad_mc(episodes, alpha, env, width, gamma=1, offset=None):
                 group = (s-1)//width  # 1<=s<=1000, but group indices start at 0
                 w[group] += alpha*(G - w[group])    # v(s,w) = w[group]
             else:   # more general version
-                features = get_features(s-1, receptive_fields)  
-                w += alpha*(G - np.dot(w, features))*features
+                left,right,v = approx_v(w,s-1,width,offset,bounds)
+                w[left:right+1] += alpha*(G - v)
         yield w
 
 # to plot things for the figure
 def plot_approximation():
     env = RandomWalkEnv()
-
     episodes = 10000
-    w_generator = grad_mc(episodes, 0.0002, env, 100)
+    width = 100
+    offset = 100
+    w_generator = grad_mc(episodes, 0.0002, env, width, offset=offset)
     for episode in range(episodes): # we only need the last one
         w = next(w_generator)
-    
+
     x = range(1,1001)
-    y = [w[(s-1)//100] for s in x]
+    bounds = get_all_bounds(width, offset, range(env.num_states))
+    y = [approx_v(w,s,width,offset,bounds)[2] for s in range(1000)]
     plt.plot(x, y, label="aggregation")
 
     # load and plot "true" values
