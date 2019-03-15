@@ -4,7 +4,6 @@ from random_walk_env import RandomWalkEnv
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-from coarse_coding import approx_v, get_all_bounds
 
 
 # returns a list of tuples (S_t, R_t)
@@ -22,14 +21,13 @@ def get_trajectory(env):
 
 # gradient Monte Carlo as on page 202
 # assumes 1000 states in env
-def grad_mc(episodes, alpha, env, width, gamma=1, offset=None):
+def grad_mc(episodes, alpha, env, width, gamma=1, offset=None, tilings=1):
     if offset is None:
+        assert tilings==1
         offset = width   # no overlap between groups
-    else:
-        bounds = get_all_bounds(width, offset, range(env.num_states))
-    
-    num_features = (1000-width)//offset+1
-    w = np.zeros(num_features)
+    assert tilings*offset==width
+    num_features = int(np.ceil(env.num_states/width))
+    w = np.zeros((tilings,num_features+1))
     for episode in range(episodes):
         if episode%1000==0:
             print("episode: "+str(episode)+"/"+str(episodes))
@@ -41,27 +39,45 @@ def grad_mc(episodes, alpha, env, width, gamma=1, offset=None):
             s = trajectory[t][0]
             G = gamma*G + r
 
-            if offset == width: # faster version
+            if offset == width: # state aggregation. faster.
                 group = (s-1)//width  # 1<=s<=1000, but group indices start at 0
-                w[group] += alpha*(G - w[group])    # v(s,w) = w[group]
+                w[0,group] += alpha*(G - w[0,group])    # v(s,w) = w[group]
             else:   # more general version
-                left,right,v = approx_v(w,s-1,width,offset,bounds)
-                w[left:right+1] += alpha*(G - v)
+                v, idxs = get_v(w,s,width,offset,tilings)
+                w[range(tilings), idxs] += alpha*(G - v)
         yield w
+
+def which_tile(s, width, offset, t):
+    tile_idx = (s-1-t*offset)//width
+    if t!=0:
+        tile_idx += 1
+    return tile_idx
+
+#w has dims (tilings,num_features)
+#1<=s<=env.num_states
+def get_v(w,s,width,offset,tilings):
+    # get features as indices into w
+    idxs = [which_tile(s,width,offset,t) for t in range(tilings)]
+
+    # v = sum of w at feature indices
+    v = np.sum(w[range(tilings), idxs])
+    return v, idxs
 
 # to plot things for the figure
 def plot_approximation():
     env = RandomWalkEnv()
     episodes = 10000
     width = 100
-    offset = 100
-    w_generator = grad_mc(episodes, 0.0002, env, width, offset=offset)
+    tilings = 1
+    offset = width//tilings
+    alpha = 0.0002/tilings
+    w_generator = grad_mc(episodes, alpha, env, width, 
+            offset=offset, tilings=tilings)
     for episode in range(episodes): # we only need the last one
         w = next(w_generator)
 
     x = range(1,1001)
-    bounds = get_all_bounds(width, offset, range(env.num_states))
-    y = [approx_v(w,s,width,offset,bounds)[2] for s in range(1000)]
+    y = [get_v(w,s,width,offset,tilings)[0] for s in x] 
     plt.plot(x, y, label="aggregation")
 
     # load and plot "true" values
