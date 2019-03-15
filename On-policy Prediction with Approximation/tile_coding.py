@@ -1,5 +1,5 @@
 # to recreate Figure 9.10
-# this is only even for one tiling, but it doesn't behave well for small values of offset. I must have made a mistake somewhere, but I don't want to spend time on this anymore.
+# I made a mistake in that I didn't allow partial fields to exist at the boundaries. This makes the boundaries less accurate. I haven't fixed it yet.
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,12 +9,12 @@ from mc_state_aggregation import grad_mc
 from coarse_coding import approx_v, get_all_bounds
 from basis_fns import get_ve
 
-runs = 3
+runs = 30
 episodes = 5000
-alpha = 0.0002
+alpha = 0.0001
 env = RandomWalkEnv()
 width = 200
-offset = 70
+offset = 200
 n = (1000-width)//offset+1  # number of features
 
 def plot_performance():
@@ -32,7 +32,13 @@ def plot_performance():
     
     # save and plot
     y = np.sqrt(avg_ve)
-    plt.plot(y, label="order "+str(n))
+    with open("one_tiling.npy","wb") as f:
+        pickle.dump(y, f)
+    
+    label = "one tiling" if offset==width \
+            else str(width//offset)+" tilings"
+    plt.plot(y, label=label)
+    plt.legend()
     plt.show()
 
 plot_performance()
