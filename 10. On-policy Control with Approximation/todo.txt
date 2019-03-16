@@ -1,0 +1,2 @@
+test 2d tile coding by learning 2d square function
+switch to sarsa(lambda) for speed
